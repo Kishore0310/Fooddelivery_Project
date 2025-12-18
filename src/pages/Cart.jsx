@@ -1,8 +1,75 @@
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+
+function PlaceOrderButton({ cart, total, clearCart }) {
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handlePlaceOrder = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          cart: cart.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            restaurantId: item.restaurantId,
+            restaurantName: item.restaurantName,
+            veg: item.veg,
+            image: item.image
+          })),
+          deliveryAddress: 'Default Address',
+          paymentMethod: 'Cash on Delivery'
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Order placed successfully! Order ID: ${data.order._id}`);
+        clearCart();
+        navigate('/orders');
+      } else {
+        const error = await response.json();
+        console.error('Order error:', error);
+        alert(`Failed to place order: ${error.message || error.error}`);
+      }
+    } catch (error) {
+      console.error('Order failed:', error);
+      alert(`Failed to place order: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handlePlaceOrder}
+      disabled={loading}
+      className="w-full bg-swiggy-orange text-white py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium text-lg disabled:opacity-50"
+    >
+      {loading ? 'Placing Order...' : 'Place Order'}
+    </button>
+  );
+}
 
 export default function Cart() {
   const { cart, addToCart, removeFromCart, clearCart, getTotalPrice } = useCart();
+  const { user } = useAuth();
   const total = getTotalPrice();
   const deliveryFee = total > 0 ? 40 : 0;
   const platformFee = total > 0 ? 2 : 0;
@@ -153,15 +220,7 @@ export default function Cart() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  alert("Order placed successfully! (This is a demo)");
-                  clearCart();
-                }}
-                className="w-full bg-swiggy-orange text-white py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium text-lg"
-              >
-                Place Order
-              </button>
+              <PlaceOrderButton cart={cart} total={finalTotal} clearCart={clearCart} />
               <p className="text-xs text-gray-500 text-center mt-4">
                 By placing this order, you agree to our Terms & Conditions
               </p>

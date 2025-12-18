@@ -1,13 +1,38 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { menuItems, restaurants } from "../utils/data";
+import { api } from "../utils/api";
 import { useCart } from "../context/CartContext";
 
 export default function RestaurantMenu() {
   const { id } = useParams();
   const { addToCart, removeFromCart, cart } = useCart();
   const restaurantId = parseInt(id);
-  const items = menuItems[restaurantId] || [];
-  const restaurant = restaurants.find((r) => r.id === restaurantId);
+  const [restaurant, setRestaurant] = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [restaurantData, menuData] = await Promise.all([
+          api.fetchRestaurant(restaurantId),
+          api.fetchMenuByRestaurant(restaurantId),
+        ]);
+        setRestaurant(restaurantData);
+        setItems(menuData);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching restaurant data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [restaurantId]);
 
   const getItemQuantity = (itemId) => {
     const cartItem = cart.find(
@@ -16,14 +41,26 @@ export default function RestaurantMenu() {
     return cartItem ? cartItem.quantity : 0;
   };
 
-  if (!restaurant) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-gray-500 text-lg mb-4">Restaurant not found</p>
+          <p className="text-gray-500 text-lg">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !restaurant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-500 text-lg mb-4">
+            {error || "Restaurant not found"}
+          </p>
           <Link
             to="/"
-            className="text-swiggy-orange hover:underline font-medium"
+            className="text-swiggy-black hover:underline font-medium"
           >
             Go back to home
           </Link>
@@ -34,7 +71,7 @@ export default function RestaurantMenu() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Restaurant Header */}
+      
       <div className="bg-white shadow-md">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row gap-6">
@@ -80,7 +117,7 @@ export default function RestaurantMenu() {
         </div>
       </div>
 
-      {/* Menu Items */}
+      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Menu</h2>
         <div className="space-y-6">
@@ -115,14 +152,14 @@ export default function RestaurantMenu() {
                         <div className="flex items-center space-x-3">
                           <button
                             onClick={() => removeFromCart(item.id, restaurantId)}
-                            className="bg-swiggy-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                            className="bg-swiggy-black text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
                           >
                             -
                           </button>
                           <span className="font-semibold text-gray-800">{quantity}</span>
                           <button
                             onClick={() => addToCart(item, restaurantId, restaurant.name)}
-                            className="bg-swiggy-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                            className="bg-swiggy-black text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
                           >
                             +
                           </button>
@@ -130,7 +167,7 @@ export default function RestaurantMenu() {
                       ) : (
                         <button
                           onClick={() => addToCart(item, restaurantId, restaurant.name)}
-                          className="bg-swiggy-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
+                          className="bg-swiggy-black text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors font-medium"
                         >
                           Add to Cart
                         </button>

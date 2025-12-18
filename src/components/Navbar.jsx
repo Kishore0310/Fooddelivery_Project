@@ -1,18 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const { getTotalItems } = useCart();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const totalItems = getTotalItems();
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Location */}
+          
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-swiggy-orange">HaveMore</span>
+              <span className="text-2xl font-bold text-swiggy-dark">HaveMore</span>
             </Link>
             
             <div className="hidden md:flex items-center space-x-2 text-sm text-gray-600">
@@ -27,7 +30,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right side - Search and Cart */}
+          
           <div className="flex items-center space-x-4">
             <Link 
               to="/orders" 
@@ -39,6 +42,39 @@ export default function Navbar() {
               <span className="text-sm font-medium">Orders</span>
             </Link>
             
+            {!isAuthenticated ? (
+              <>
+                <Link 
+                  to="/login" 
+                  className="text-sm font-medium text-gray-700 hover:text-swiggy-orange transition-colors"
+                >
+                  Login
+                </Link>
+                <Link 
+                  to="/signup" 
+                  className="text-sm font-medium text-swiggy-orange border border-swiggy-orange px-3 py-1 rounded-lg hover:bg-orange-50 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-sm font-semibold text-gray-800">Hi, {user?.name || "User"}</span>
+                  <span className="text-xs text-gray-500">{user?.email}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                  className="text-sm font-medium text-gray-700 hover:text-swiggy-orange transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+
             <Link 
               to="/cart" 
               className="relative flex items-center space-x-2 bg-swiggy-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"

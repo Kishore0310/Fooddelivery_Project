@@ -1,27 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RestaurantCard from "../components/RestaurantCard";
-import { restaurants, foodCategories } from "../utils/data";
+import { api } from "../utils/api";
 
 export default function Home() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [restaurants, setRestaurants] = useState([]);
+  const [foodCategories, setFoodCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredRestaurants = restaurants.filter(r => {
-    const matchesSearch = 
-      r.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.cuisine.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesCategory = selectedCategory 
-      ? r.cuisine.toLowerCase().includes(selectedCategory.toLowerCase())
-      : true;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // Fetch restaurants and categories on mount and when filters change
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch categories once
+        if (foodCategories.length === 0) {
+          const categories = await api.fetchCategories();
+          setFoodCategories(categories);
+        }
+        
+        // Fetch restaurants with filters
+        const filtered = await api.fetchRestaurants(search, selectedCategory);
+        setRestaurants(filtered);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [search, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-swiggy-orange to-orange-600 text-white py-12">
+      
+      <div className="bg-gradient-to-r from-swiggy-yellow to-yellow-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -32,7 +51,7 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Search Bar */}
+          
           <div className="max-w-2xl mx-auto">
             <div className="relative">
               <input
@@ -58,22 +77,28 @@ export default function Home() {
       {/* Food Categories */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">What's on your mind?</h2>
-        <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
-          {foodCategories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
-              className={`flex flex-col items-center space-y-2 min-w-[100px] p-4 rounded-lg transition-all ${
-                selectedCategory === category.name
-                  ? "bg-swiggy-orange text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
-              }`}
-            >
-              <span className="text-4xl">{category.icon}</span>
-              <span className="text-sm font-medium">{category.name}</span>
-            </button>
-          ))}
-        </div>
+        {loading && foodCategories.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Loading categories...</p>
+          </div>
+        ) : (
+          <div className="flex space-x-6 overflow-x-auto pb-4 scrollbar-hide">
+            {foodCategories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
+                className={`flex flex-col items-center space-y-2 min-w-[100px] p-4 rounded-lg transition-all ${
+                  selectedCategory === category.name
+                    ? "bg-swiggy-yellow text-white shadow-lg"
+                    : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                }`}
+              >
+                <span className="text-4xl">{category.icon}</span>
+                <span className="text-sm font-medium">{category.name}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Restaurants Section */}
@@ -92,13 +117,27 @@ export default function Home() {
           )}
         </div>
 
-        {filteredRestaurants.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">Loading restaurants...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">Error: {error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 text-swiggy-orange hover:underline text-sm font-medium"
+            >
+              Retry
+            </button>
+          </div>
+        ) : restaurants.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">No restaurants found. Try a different search.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredRestaurants.map((restaurant) => (
+            {restaurants.map((restaurant) => (
               <RestaurantCard key={restaurant.id} restaurant={restaurant} />
             ))}
           </div>
