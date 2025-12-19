@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://fooddelivery-backend-gcrf.onrender.com/api";
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("auth_token");
@@ -31,7 +31,7 @@ async function request(path, options = {}) {
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.error('Network Error: Cannot connect to backend. Is the server running?');
-      throw new Error('Cannot connect to server. Please make sure the backend is running on http://localhost:3001');
+      throw new Error(`Cannot connect to server. Please check if the backend is running at ${API_BASE_URL}`);
     }
     throw error;
   }
