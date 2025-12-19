@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../utils/api";
 import { useCart } from "../context/CartContext";
+import { restaurants as localRestaurants, menuItems as localMenuItems } from "../data/restaurants";
 
 export default function RestaurantMenu() {
   const { id } = useParams();
@@ -17,12 +18,30 @@ export default function RestaurantMenu() {
       try {
         setLoading(true);
         setError(null);
-        const [restaurantData, menuData] = await Promise.all([
-          api.fetchRestaurant(restaurantId),
-          api.fetchMenuByRestaurant(restaurantId),
-        ]);
-        setRestaurant(restaurantData);
-        setItems(menuData);
+        
+        const isLocal = window.location.hostname === 'localhost';
+        
+        if (isLocal) {
+          // Use API in development
+          const [restaurantData, menuData] = await Promise.all([
+            api.fetchRestaurant(restaurantId),
+            api.fetchMenuByRestaurant(restaurantId),
+          ]);
+          setRestaurant(restaurantData);
+          setItems(menuData);
+        } else {
+          // Use local data in production
+          const restaurantData = localRestaurants.find(r => r.id === restaurantId);
+          const menuData = localMenuItems.filter(item => item.restaurantId === restaurantId);
+          
+          if (!restaurantData) {
+            setError('Restaurant not found');
+            return;
+          }
+          
+          setRestaurant(restaurantData);
+          setItems(menuData);
+        }
       } catch (err) {
         setError(err.message);
         console.error("Error fetching restaurant data:", err);

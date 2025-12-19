@@ -142,3 +142,16 @@ export const categories = [
   { id: 7, name: "Fast Food", icon: "🍟" },
   { id: 8, name: "North Indian", icon: "🍜" }
 ];
+
+export const menuItems = [
+  { id: 1, name: "Margherita Pizza", price: 199, description: "Classic pizza with tomato and mozzarella", image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=200&h=200&fit=crop", veg: true, restaurantId: 1 },
+  { id: 2, name: "Pepperoni Pizza", price: 249, description: "Spicy pepperoni with cheese", image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=200&h=200&fit=crop", veg: false, restaurantId: 1 },
+  { id: 3, name: "Whopper Burger", price: 179, description: "Flame-grilled beef burger", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop", veg: false, restaurantId: 2 },
+  { id: 4, name: "Veg Burger", price: 149, description: "Crispy veggie patty burger", image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=200&h=200&fit=crop", veg: true, restaurantId: 2 },
+  { id: 5, name: "Chicken Biryani", price: 299, description: "Aromatic basmati rice with chicken", image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=200&h=200&fit=crop", veg: false, restaurantId: 3 },
+  { id: 6, name: "Veg Biryani", price: 249, description: "Fragrant rice with mixed vegetables", image: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=200&h=200&fit=crop", veg: true, restaurantId: 3 },
+  { id: 7, name: "Hakka Noodles", price: 189, description: "Stir-fried noodles with vegetables", image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=200&h=200&fit=crop", veg: true, restaurantId: 4 },
+  { id: 8, name: "Chilli Chicken", price: 229, description: "Spicy chicken in Chinese sauce", image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=200&h=200&fit=crop", veg: false, restaurantId: 4 },
+  { id: 9, name: "Vanilla Ice Cream", price: 99, description: "Classic vanilla flavor", image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=200&fit=crop", veg: true, restaurantId: 5 },
+  { id: 10, name: "Chocolate Sundae", price: 149, description: "Rich chocolate with toppings", image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=200&h=200&fit=crop", veg: true, restaurantId: 5 }
+];
