@@ -26,11 +26,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
+      console.log('AuthContext: Calling API login');
       const data = await api.login(email, password);
+      console.log('AuthContext: Login API response:', data);
       setUser(data.user);
       setToken(data.token);
+      console.log('AuthContext: User and token set');
       return { success: true };
     } catch (err) {
+      console.error('AuthContext: Login error:', err);
       setError(err.message);
       return { success: false, error: err.message };
     } finally {

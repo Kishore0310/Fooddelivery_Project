@@ -15,10 +15,14 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError(null);
+    console.log('Login attempt:', form.email);
     const res = await login(form.email, form.password);
+    console.log('Login response:', res);
     if (res.success) {
+      console.log('Login successful, navigating to home');
       navigate("/");
     } else {
+      console.error('Login failed:', res.error);
       setLocalError(res.error);
     }
   };

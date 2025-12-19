@@ -15,7 +15,7 @@ export default function Orders() {
       }
 
       try {
-        const response = await fetch('http://localhost:9000/api/orders', {
+        const response = await fetch('http://localhost:3001/api/orders', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
