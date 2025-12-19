@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import RestaurantCard from "../components/RestaurantCard";
 import { api } from "../utils/api";
+import { restaurants as localRestaurants, categories as localCategories } from "../data/restaurants";
 
 export default function Home() {
   const [search, setSearch] = useState("");
@@ -17,15 +18,44 @@ export default function Home() {
         setLoading(true);
         setError(null);
         
-        // Fetch categories once
-        if (foodCategories.length === 0) {
-          const categories = await api.fetchCategories();
-          setFoodCategories(categories);
-        }
+        // Use local data in production, API in development
+        const isLocal = window.location.hostname === 'localhost';
         
-        // Fetch restaurants with filters
-        const filtered = await api.fetchRestaurants(search, selectedCategory);
-        setRestaurants(filtered);
+        if (isLocal) {
+          // Fetch from API when running locally
+          if (foodCategories.length === 0) {
+            const categories = await api.fetchCategories();
+            setFoodCategories(categories);
+          }
+          const filtered = await api.fetchRestaurants(search, selectedCategory);
+          setRestaurants(filtered);
+        } else {
+          // Use local data in production
+          if (foodCategories.length === 0) {
+            setFoodCategories(localCategories);
+          }
+          
+          let filtered = localRestaurants;
+          
+          // Apply search filter
+          if (search) {
+            const searchLower = search.toLowerCase();
+            filtered = filtered.filter(r =>
+              r.name.toLowerCase().includes(searchLower) ||
+              r.cuisine.toLowerCase().includes(searchLower)
+            );
+          }
+          
+          // Apply category filter
+          if (selectedCategory) {
+            const categoryLower = selectedCategory.toLowerCase();
+            filtered = filtered.filter(r =>
+              r.cuisine.toLowerCase().includes(categoryLower)
+            );
+          }
+          
+          setRestaurants(filtered);
+        }
       } catch (err) {
         setError(err.message);
         console.error("Error fetching data:", err);

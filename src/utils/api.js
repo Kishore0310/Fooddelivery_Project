@@ -1,5 +1,13 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://fooddelivery-backend-gcrf.onrender.com/api');
+const LOCAL_API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : null;
+const RENDER_API = 'https://fooddelivery-backend-gcrf.onrender.com/api';
+
+// Use local API for data, Render for auth
+const getApiUrl = (endpoint) => {
+  if (endpoint.startsWith('/auth')) {
+    return RENDER_API;
+  }
+  return LOCAL_API || RENDER_API;
+};
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("auth_token");
@@ -10,7 +18,8 @@ async function request(path, options = {}) {
   };
 
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, {
+    const apiUrl = getApiUrl(path);
+    const res = await fetch(`${apiUrl}${path}`, {
       headers,
       ...options,
     });
@@ -32,7 +41,7 @@ async function request(path, options = {}) {
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.error('Network Error: Cannot connect to backend. Is the server running?');
-      throw new Error(`Cannot connect to server. Please check if the backend is running at ${API_BASE_URL}`);
+      throw new Error(`Cannot connect to server. Please check if the backend is running at ${apiUrl || 'the configured API endpoint'}`);
     }
     throw error;
   }
