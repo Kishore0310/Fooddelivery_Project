@@ -32,10 +32,30 @@ function PlaceOrderButton({ cart, total, clearCart }) {
         paymentMethod: 'Cash on Delivery'
       };
 
-      const data = await api.createOrder(orderData);
-      alert(`Order placed successfully! Order ID: ${data.order._id}`);
-      clearCart();
-      navigate('/orders');
+      console.log('Placing order with data:', orderData);
+      console.log('Token:', token);
+
+      // Direct fetch for debugging
+      const response = await fetch('https://fooddelivery-backend-gcrf.onrender.com/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (response.ok) {
+        alert(`Order placed successfully! Order ID: ${data.order._id}`);
+        clearCart();
+        navigate('/orders');
+      } else {
+        alert(`Failed to place order: ${data.message || data.error}`);
+      }
     } catch (error) {
       console.error('Order failed:', error);
       alert(`Failed to place order: ${error.message}`);
