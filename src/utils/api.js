@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://fooddelivery-backend-gcrf.onrender.com/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://fooddelivery-backend-gcrf.onrender.com/api');
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("auth_token");
