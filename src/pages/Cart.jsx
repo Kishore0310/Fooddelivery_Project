@@ -2,6 +2,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { api } from "../utils/api";
 
 function PlaceOrderButton({ cart, total, clearCart }) {
   const { user, token } = useAuth();
@@ -16,38 +17,25 @@ function PlaceOrderButton({ cart, total, clearCart }) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          cart: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            restaurantId: item.restaurantId,
-            restaurantName: item.restaurantName,
-            veg: item.veg,
-            image: item.image
-          })),
-          deliveryAddress: 'Default Address',
-          paymentMethod: 'Cash on Delivery'
-        })
-      });
+      const orderData = {
+        cart: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          restaurantId: item.restaurantId,
+          restaurantName: item.restaurantName,
+          veg: item.veg,
+          image: item.image
+        })),
+        deliveryAddress: 'Default Address',
+        paymentMethod: 'Cash on Delivery'
+      };
 
-      if (response.ok) {
-        const data = await response.json();
-        alert(`Order placed successfully! Order ID: ${data.order._id}`);
-        clearCart();
-        navigate('/orders');
-      } else {
-        const error = await response.json();
-        console.error('Order error:', error);
-        alert(`Failed to place order: ${error.message || error.error}`);
-      }
+      const data = await api.createOrder(orderData);
+      alert(`Order placed successfully! Order ID: ${data.order._id}`);
+      clearCart();
+      navigate('/orders');
     } catch (error) {
       console.error('Order failed:', error);
       alert(`Failed to place order: ${error.message}`);
