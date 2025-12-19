@@ -17,8 +17,9 @@ async function request(path, options = {}) {
     ...(options.headers || {}),
   };
 
+  const apiUrl = getApiUrl(path);
+  
   try {
-    const apiUrl = getApiUrl(path);
     const res = await fetch(`${apiUrl}${path}`, {
       headers,
       ...options,
