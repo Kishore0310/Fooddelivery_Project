@@ -1,12 +1,18 @@
-const LOCAL_API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : null;
 const RENDER_API = 'https://fooddelivery-backend-gcrf.onrender.com/api';
+const LOCAL_API = 'http://localhost:3001/api';
 
-// Use local API for data, Render for auth and orders
+// Always use Render for auth and orders, local for development data
 const getApiUrl = (endpoint) => {
+  // Always use Render for auth and orders
   if (endpoint.startsWith('/auth') || endpoint.startsWith('/orders')) {
     return RENDER_API;
   }
-  return LOCAL_API || RENDER_API;
+  // Use local API only when running on localhost
+  if (window.location.hostname === 'localhost') {
+    return LOCAL_API;
+  }
+  // Fallback to Render for production
+  return RENDER_API;
 };
 
 async function request(path, options = {}) {
