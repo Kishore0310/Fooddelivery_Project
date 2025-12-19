@@ -41,7 +41,7 @@ async function request(path, options = {}) {
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.error('Network Error: Cannot connect to backend. Is the server running?');
-      throw new Error(`Cannot connect to server. Please check if the backend is running at ${apiUrl || 'the configured API endpoint'}`);
+      throw new Error(`Cannot connect to server. Please check if the backend is running at ${apiUrl}`);
     }
     throw error;
   }
